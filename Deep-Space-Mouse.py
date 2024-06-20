@@ -1,10 +1,10 @@
 import pygame, random as rd, math, heapq, csv, os
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from functions import create_ship, search_button_increment
 
 def main(): 
     pygame.init()
-    d = 40
+    d = 12
     mice_type = 1
     alpha = .04
     # rd.seed(25) # Set random seed (same result each run)
@@ -38,16 +38,18 @@ def main():
                 if color == "orchid":
                      open_cells.append(coordinates)
 
-    for x, y in open_cells:
-         x, y = int(x//SPLIT), int(y//SPLIT)
-         print(x,y)
-
     # Initial Robot and Mouse
     rd.shuffle(open_cells)
     robot_location = open_cells[0]
     mouse_1_location = open_cells[1]
+
+    ship_probabilities = {} # Probabilities of mouse being in each given square
+    starting_probability = 1 / (len(open_cells) - 1) # At the start, the mouse can be in any open square other than the robot square
+    for x,y in open_cells[1:]:
+         x, y = int(x//SPLIT), int(y//SPLIT)         
+         ship_probabilities[(x,y)] = starting_probability   # Set all of them to each other
     
-    robot_position = (int(robot_location[1] // SPLIT), int(robot_location[0] // SPLIT))
+    robot_position = (int(robot_location[1] // SPLIT), int(robot_location[0] // SPLIT)) 
     mouse_1_position = (int(mouse_1_location[1] // SPLIT), int(mouse_1_location[0] // SPLIT))
       
     test_surface.fill("whitesmoke")
@@ -66,10 +68,11 @@ def main():
                 # If user presses X, stop the program
                 pygame.quit()
         pygame.display.update()
-        # Increment, find new robot  
-        _, new_robot_position = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, alpha)
+        # Increment 
+        _, new_robot_position = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
+                                                                                ship_probabilities, alpha)
 
-        # Robot has no path to the button, self-destruct. 
+
         if True and False:
              pygame.quit()  
           #    with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI-Project\IAL-Projects\Project 1\DataFiles\robot_data.csv', 'a', newline='') as file:
@@ -93,7 +96,6 @@ def main():
         robot_position = new_robot_position
         pygame.time.wait(50)
         step_counter+=1
-
         clock.tick(60) # Set framerate
     pygame.quit()
 
