@@ -11,21 +11,22 @@ def search_button_increment(ship, robot_position, mouse_positions, ship_probabil
         tiebreaker = 1
         if x==c[0] or c[1]==y:
              tiebreaker = 0
-        return (v, manhattan_distance, tiebreaker)   ## Sort by value first, then manhattan distance
+        return (v, -manhattan_distance, tiebreaker)   ## Sort by value first, then manhattan distance
     
-    temp = list(ship_probabilities.items())
-    temp = sorted(temp, key = sort_key)
+    temp = list(ship_probabilities.items())   # Turn ship probabalities into list: ((x,y), probability)
+    temp = sorted(temp, key = sort_key, reverse= True)      # Sort by highest probability
+    coordinates, _ = temp[0]
+    path = []
 
+    while not path:      
+          path = robot_shortest_path(ship, robot_position, coordinates)
+          temp.pop(0)
+          coordinates, _ = temp[0]
 
-    # temp = list(map(lambda x: (x[0], x[1]*-1), temp))
-    # heapq.heapify(temp)
+    return path 
+    
 
-    if True:
-         sense.sense(robot_position, mouse_positions, alpha)
-    return [], (x,y)
-
-
-def robot_two_shortest_path(ship, start, goal):
+def robot_shortest_path(ship, start, goal):
     ## Find all possible neighbors for a given coordinate
     def get_neighbors(curr_position):
          neighbors = []

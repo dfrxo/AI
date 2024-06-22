@@ -8,9 +8,7 @@ def create_ship(d):
   x1,y1 = rd.randint(1, d-2), rd.randint(1, d-2)               # Choose random coordinates in interior
   ship_layout[x1][y1] = 'O'
   one_open_neighbor = []
-  
-  ship_probabilities = {}
-  
+    
   while True:  # "Iteratively do the following" part
       one_open_neighbor.clear()
       for x in range(1,d-1):

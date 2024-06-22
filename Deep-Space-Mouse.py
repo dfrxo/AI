@@ -1,13 +1,14 @@
 import pygame, random as rd, math, heapq, csv, os
 from collections import defaultdict, OrderedDict
-from functions import create_ship, search_button_increment
+from functions import create_ship, search_button_increment, sense, update_probability
+
 
 def main(): 
     pygame.init()
-    d = 12
+    d = 40
     mice_type = 1
-    alpha = .04
-    # rd.seed(25) # Set random seed (same result each run)
+    alpha = .15
+    #rd.seed(30) # Set random seed (same result each run)
 
     SCREEN_WIDTH = 900
     SCREEN_HEIGHT = 900
@@ -55,10 +56,14 @@ def main():
     test_surface.fill("whitesmoke")
     screen.blit(test_surface,robot_location[0:2])
     ship[robot_position[0]][robot_position[1]] = 'R'
+    ship_probabilities[robot_position] = 0 
 
     test_surface.fill("chartreuse")
     screen.blit(test_surface,mouse_1_location[0:2])
     ship[mouse_1_position[0]][mouse_1_position[1]] = 'M'
+    path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
+                                                                    ship_probabilities, alpha)
+    end = False
     run =True
     step_counter = 0
     while run:
@@ -68,12 +73,40 @@ def main():
                 # If user presses X, stop the program
                 pygame.quit()
         pygame.display.update()
+        
         # Increment 
-        _, new_robot_position = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
+        if len(path)==0:   # If the bot has moved to the spot with the highest probability, sense.
+            print("Sense")
+            if sense.sense(robot_position,mouse_1_position,alpha): # Sense. 
+                update_probability.update_probability_beep(ship_probabilities, robot_position, alpha) # Update probabilities given a beep
+            else: # No beep so update probabilities
+                update_probability.update_probability_no_beep(ship_probabilities, robot_position, alpha) 
+            path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
                                                                                 ship_probabilities, alpha)
 
+        new_robot_position = path[0]
+        ship_probabilities[new_robot_position] = 0
+        path.pop(0)
 
-        if True and False:
+        x,y = robot_position
+        ship_surfaces_dict[(y*SPLIT,x*SPLIT)]
+        ship[x][y] = 'O'
+        test_surface.fill("orchid")
+        screen.blit(test_surface,(y*SPLIT,x*SPLIT))
+       
+        x,y = new_robot_position
+        if ship[x][y]=='M':
+             end = True
+
+        ship_surfaces_dict[(y*SPLIT,x*SPLIT)]
+        ship[x][y] = 'R'
+        test_surface.fill("whitesmoke")
+        screen.blit(test_surface,(y*SPLIT,x*SPLIT))
+        robot_position = new_robot_position 
+
+
+
+        if end:
              pygame.quit()  
           #    with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI-Project\IAL-Projects\Project 1\DataFiles\robot_data.csv', 'a', newline='') as file:
           #         writer = csv.writer(file)
@@ -81,19 +114,9 @@ def main():
           #         print("written", new_fire_positions)
           #    run = False
              break
+        
+        # sense()
 
-        x,y = robot_position
-        ship_surfaces_dict[(y*SPLIT,x*SPLIT)]
-        ship[x][y] = 'O'
-        test_surface.fill("orchid")
-        screen.blit(test_surface,(y*SPLIT,x*SPLIT))
-
-        x,y = new_robot_position
-        ship_surfaces_dict[(y*SPLIT,x*SPLIT)]
-        ship[x][y] = 'R'
-        test_surface.fill("whitesmoke")
-        screen.blit(test_surface,(y*SPLIT,x*SPLIT))
-        robot_position = new_robot_position
         pygame.time.wait(50)
         step_counter+=1
         clock.tick(60) # Set framerate
