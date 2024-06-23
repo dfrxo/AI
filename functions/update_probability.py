@@ -21,7 +21,7 @@ def update_probability_beep(ship_probability, robot_position, alpha):
         m_probability = ship_probability[coordinates]
         new_probability = (curr_bm_probability * m_probability) / total_beep_probability
         ship_probability[coordinates] = new_probability
-    print(total_beep_probability)
+    print("beep" + str(total_beep_probability))
 
 
     

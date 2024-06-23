@@ -73,14 +73,17 @@ def main():
         pygame.display.update()
         
         # Increment 
-        if len(path)==0:   # If the bot has moved to the spot with the highest probability, sense.
+        if step_counter % 2 == 1:
             print("Sense")
             if sense.sense(robot_position,mouse_1_position,alpha): # Sense. 
                 update_probability.update_probability_beep(ship_probabilities, robot_position, alpha) # Update probabilities given a beep
             else: # No beep so update probabilities
                 update_probability.update_probability_no_beep(ship_probabilities, robot_position, alpha) 
-            path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
-                                                                                ship_probabilities, alpha)
+            step_counter+=1
+            continue
+         
+        path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
+                                                                            ship_probabilities, alpha)
 
         new_robot_position = path[0]
         ship_probabilities[new_robot_position] = 0

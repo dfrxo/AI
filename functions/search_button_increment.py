@@ -17,7 +17,6 @@ def search_button_increment(ship, robot_position, mouse_positions, ship_probabil
     temp = sorted(temp, key = sort_key, reverse= True)      # Sort by highest probability
     coordinates, _ = temp[0]
     path = []
-
     while not path:      
           path = robot_shortest_path(ship, robot_position, coordinates)
           temp.pop(0)
