@@ -23,7 +23,6 @@ def update_probability_beep(ship_probability, robot_position, alpha):
         ship_probability[coordinates] = new_probability
     print("beep" + str(total_beep_probability))
 
-
     
 def update_probability_no_beep(ship_probability, robot_position, alpha):
     total_no_beep_probability = 0
