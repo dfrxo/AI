@@ -130,7 +130,7 @@ def main():
           #         print("written", new_fire_positions)
           #    run = False
              break
-        #pygame.time.wait(250)
+        pygame.time.wait(100)
         step_counter+=1
         clock.tick(60) # Set framerate
     pygame.quit()

@@ -5,11 +5,10 @@ from functions import create_ship, search_button_increment, sense, update_probab
 
 def main(): 
     pygame.init()
-    mice = 2
-    d = 41
+    d = 14
     mice_type = 1   # 1 for stationary, 2 for stochastic
-    alpha = .11
-    #rd.seed() # Set random seed (same result each run)
+    alpha = .05
+    rd.seed(8) # Set random seed (same result each run)
     SCREEN_WIDTH = 900
     SCREEN_HEIGHT = 900
     SURFACE_WIDTH = math.ceil(SCREEN_WIDTH / d) 
@@ -23,6 +22,7 @@ def main():
     ship = create_ship.create_ship(d)
     ship_probabilities = {} 
     SPLIT = SCREEN_HEIGHT / len(ship)
+    
     # Split screen into blocks 
     ship_surfaces_dict = {(y*SPLIT,x*SPLIT):ship[x][y] for x in range(len(ship)) for y in range(len(ship))}
 
@@ -36,31 +36,39 @@ def main():
                 test_surface.fill(color)
                 screen.blit(test_surface, coordinates[0:2])
                 if color == "orchid":
+                     #open_cells.append(coordinates)
                      open_cells.append((round(coordinates[1]/SPLIT), round(coordinates[0]/SPLIT)))
+    pygame.display.update()
     # Initial Robot and Mouse
     rd.shuffle(open_cells)
-    robot_location = open_cells[0]
-    mouse_1_location = open_cells[1]
+    robot_position = open_cells[0]
+    mouse_1_position = open_cells[1]
+    mouse_2_position = open_cells[2]
+
     
     ship_probabilities = {} # Probabilities of mouse being in each given square
-    starting_probability = 1 / (len(open_cells) - 1) # At the start, the mouse can be in any open square other than the robot square
+    starting_probability = 1 / (len(open_cells) - 2) # At the start, the mouse can be in any open square other than the robot square
     for x,y in open_cells[1:]:  
          ship_probabilities[(x,y)] = starting_probability   # Set all of them to each other
-    
-    robot_position = robot_location
-    mouse_1_position = mouse_1_location
-    
+
+    ship_probabilities = dict(sorted(list(ship_probabilities.items()), key = lambda x: x[0]))
       
     test_surface.fill("whitesmoke")
-    screen.blit(test_surface,(int(robot_position[1]*SPLIT), int(robot_position[0]*SPLIT)))
+    screen.blit(test_surface,(round(robot_position[1]*SPLIT), round(robot_position[0]*SPLIT)))
     ship[robot_position[0]][robot_position[1]] = 'R'
     ship_probabilities[robot_position] = 0 
 
     test_surface.fill("chartreuse")
-    screen.blit(test_surface,(int(mouse_1_position[1]*SPLIT), int(mouse_1_position[0]*SPLIT)))
+    screen.blit(test_surface,(round(mouse_1_position[1]*SPLIT), round(mouse_1_position[0]*SPLIT)))
     ship[mouse_1_position[0]][mouse_1_position[1]] = 'M'
+    screen.blit(test_surface,(round(mouse_2_position[1]*SPLIT), round(mouse_2_position[0]*SPLIT)))
+    ship[mouse_2_position[0]][mouse_2_position[1]] = 'M'
+    
+
     path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
                                                                     ship_probabilities, alpha)
+    
+    first_mouse_found = False
     end = False
     run =True
     step_counter = 0
@@ -73,33 +81,36 @@ def main():
         pygame.display.update()
         
         # Increment 
-        if step_counter % 2 == 1:
+        if len(path)==0:   # If the bot has moved to the spot with the highest probability, sense.
             print("Sense")
-            if sense.sense(robot_position,mouse_1_position,alpha): # Sense. 
+            if sense.senseTwo(robot_position,mouse_1_position,mouse_2_position,alpha): # Sense. 
                 update_probability.update_probability_beep(ship_probabilities, robot_position, alpha) # Update probabilities given a beep
             else: # No beep so update probabilities
                 update_probability.update_probability_no_beep(ship_probabilities, robot_position, alpha) 
-            step_counter+=1
-            continue
-         
-        path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
-                                                                            ship_probabilities, alpha)
+            path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
+                                                                                ship_probabilities, alpha)
 
         new_robot_position = path[0]
         ship_probabilities[new_robot_position] = 0
         path.pop(0)
 
         x,y = robot_position
-        #ship_surfaces_dict[(y*SPLIT,x*SPLIT)]
         ship[x][y] = 'O'
         test_surface.fill("orchid")
         screen.blit(test_surface,(y*SPLIT,x*SPLIT))
        
         x,y = new_robot_position
         if ship[x][y]=='M':
-             end = True
+             if first_mouse_found == True:
+                end = True
+             else:
+                first_mouse_found = True
+                if x == mouse_1_position[0] and y== mouse_1_position[1]:
+                     mouse_1_position = False
+                else:
+                     mouse_2_position = False
+             
 
-        #ship_surfaces_dict[(y*SPLIT,x*SPLIT)]
         ship[x][y] = 'R'
         test_surface.fill("whitesmoke")
         screen.blit(test_surface,(y*SPLIT,x*SPLIT))
@@ -114,12 +125,13 @@ def main():
             screen.blit(test_surface,(y*SPLIT,x*SPLIT))
 
             test_surface.fill("chartreuse")
-            screen.blit(test_surface,(round(new_mouse_position[1]*SPLIT), round(new_mouse_position[0]*SPLIT)))
+            screen.blit(test_surface,(int(new_mouse_position[1]*SPLIT), int(new_mouse_position[0]*SPLIT)))
             ship[new_mouse_position[0]][new_mouse_position[1]] = 'M'
 
             mouse_1_position = new_mouse_position
             ship_probabilities = stochastic_mouse.stochastic_update_probability(ship, ship_probabilities)
 
+            
 
 
         if end:
@@ -130,7 +142,7 @@ def main():
           #         print("written", new_fire_positions)
           #    run = False
              break
-        pygame.time.wait(100)
+        pygame.time.wait(30)
         step_counter+=1
         clock.tick(60) # Set framerate
     pygame.quit()
