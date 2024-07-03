@@ -1,18 +1,18 @@
 import pygame, random as rd, math, heapq, csv, os
 from collections import defaultdict, OrderedDict
-from functions import create_ship, search_button_increment, sense, update_probability, stochastic_mouse,bot_3_smart_sense
+from functions import create_ship, search_button_increment, sense, update_probability, stochastic_mouse, bot_3_smart_sense
 
 
 def main(): 
     pygame.init()
-    bot_id = 2
+    bot_id = 3
     d = 41
     mice_type = 2   # 1 for stationary, 2 for stochastic
     alpha = .06
     #rd.seed() # Set random seed (same result each run)
     SCREEN_WIDTH = 900
     SCREEN_HEIGHT = 900
-    SURFACE_WIDTH = math.ceil(SCREEN_WIDTH / d) 
+    SURFACE_WIDTH = math.ceil(SCREEN_WIDTH / d)
     SURFACE_HEIGHT = math.ceil(SCREEN_HEIGHT / d) 
 
     test_surface = pygame.Surface((SURFACE_WIDTH,SURFACE_HEIGHT)) # Surface object goes on top of display
@@ -61,9 +61,16 @@ def main():
     ship[mouse_1_position[0]][mouse_1_position[1]] = 'M'
     path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
                                                                     ship_probabilities, alpha)
+    step_counter = 0
+    # for _ in range(1):
+    #     if sense.sense(robot_position,mouse_1_position,alpha): # Sense. 
+    #                 update_probability.update_probability_beep(ship_probabilities, robot_position, alpha) # Update probabilities given a beep
+    #     else: # No beep so update probabilities
+    #                 update_probability.update_probability_no_beep(ship_probabilities, robot_position, alpha)
+    #     step_counter+=1
+
     end = False
     run =True
-    step_counter = 0
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -72,22 +79,33 @@ def main():
                 pygame.quit()
         pygame.display.update()
         
-        # Increment 
-        if step_counter % 2 == 1:
+        # Increment
+       # if step_counter%2 == 1: 
+        if bot_3_smart_sense.bot_3_smart_sense(ship_probabilities, robot_position, alpha,):
             print("Sense")
             if sense.sense(robot_position,mouse_1_position,alpha): # Sense. 
                 update_probability.update_probability_beep(ship_probabilities, robot_position, alpha) # Update probabilities given a beep
             else: # No beep so update probabilities
                 update_probability.update_probability_no_beep(ship_probabilities, robot_position, alpha) 
             step_counter+=1
-            continue
+            
          
         path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
                                                                             ship_probabilities, alpha)
+        path_length = min(len(path), 14)  # 4 sucks, 11 : 296, 6:299, 20 : 290
+
+        montecarlo_map = bot_3_smart_sense.bot_3_montecarlo(ship, ship_probabilities, path_length)
+        
+        path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, montecarlo_map, alpha)
+
+
+
 
         new_robot_position = path[0]
         ship_probabilities[new_robot_position] = 0
         path.pop(0)
+
+        bot_3_smart_sense.nudge(ship_probabilities, robot_position, new_robot_position)
 
         x,y = robot_position
         #ship_surfaces_dict[(y*SPLIT,x*SPLIT)]
@@ -103,7 +121,6 @@ def main():
         ship[x][y] = 'R'
         test_surface.fill("whitesmoke")
         screen.blit(test_surface,(y*SPLIT,x*SPLIT))
-        robot_position = new_robot_position 
 
         if mice_type == 2:
             new_mouse_position = stochastic_mouse.stochastic_mouse(ship, mouse_1_position)
@@ -119,19 +136,20 @@ def main():
 
             mouse_1_position = new_mouse_position
             ship_probabilities = stochastic_mouse.stochastic_update_probability(ship, ship_probabilities)
+            bot_3_smart_sense.nudge(ship_probabilities, robot_position, new_robot_position)
 
 
+        robot_position = new_robot_position 
 
         if end:
              pygame.quit()  
-             with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI\datafiles\data.csv', 'a', newline='') as file:
+             with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI\datafiles\data2.csv', 'a', newline='') as file:
                   writer = csv.writer(file)
                   writer.writerows([[bot_id, mice_type, step_counter, alpha]])
                   print("written")
              run = False
              break
-        #pygame.time.wait(100)
-
+        #pygame.time.wait(5)
         update_probability.normalize(ship_probabilities)
 
         step_counter+=1

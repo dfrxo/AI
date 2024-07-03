@@ -5,6 +5,7 @@ from functions import create_ship, search_button_increment, sense, update_probab
 
 def main(): 
     pygame.init()
+    bot_id = 1
     d = 41
     mice_type = 2   # 1 for stationary, 2 for stochastic
     alpha = .11
@@ -124,13 +125,12 @@ def main():
 
         if end:
              pygame.quit()  
-          #    with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI-Project\IAL-Projects\Project 1\DataFiles\robot_data.csv', 'a', newline='') as file:
-          #         writer = csv.writer(file)
-          #         writer.writerows([[robot_type, d, q, step_counter, new_fire_positions]])
-          #         print("written", new_fire_positions)
-          #    run = False
+             with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI\datafiles\data.csv', 'a', newline='') as file:
+                  writer = csv.writer(file)
+                  writer.writerows([[bot_id, mice_type, step_counter,alpha]])
+                  print("written")
              break
-        pygame.time.wait(100)
+        #pygame.time.wait(30)
         step_counter+=1
         clock.tick(60) # Set framerate
     pygame.quit()

@@ -9,6 +9,7 @@ def sense(robot_position, mouse_positions, alpha):
      result = math.e ** (-alpha * (manhattan_distance-1))  # Find chance of beep
      print(result)
      if rd.random() < result:          # Roll for beep, return True if we get a beep
+          print("Beep")
           return True
      return False             # Return false if no beep
 
@@ -22,6 +23,7 @@ def senseTwo(robot_position, mouse_1, mouse_2, alpha):
           result = math.e ** (-alpha * (manhattan_distance-1))  # Find chance of beep
           print(result)
           if rd.random() < result:          # Roll for beep, return True if we get a beep
+               print("Beep")
                return True
 
      if mouse_2 != False:
@@ -32,6 +34,7 @@ def senseTwo(robot_position, mouse_1, mouse_2, alpha):
           result = math.e ** (-alpha * (manhattan_distance-1))  # Find chance of beep
           print(result)
           if rd.random() < result:          # Roll for beep, return True if we get a beep
+               print("Beep")
                return True
      
      return False             # Return false if no beep
