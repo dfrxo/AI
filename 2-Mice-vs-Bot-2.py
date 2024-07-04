@@ -8,7 +8,7 @@ def main():
     bot_id = 2
     d = 41
     mice_type = 2   # 1 for stationary, 2 for stochastic
-    alpha = .17
+    alpha = .25
     
     #rd.seed(8) # Set random seed (same result each run)
     SCREEN_WIDTH = 900
