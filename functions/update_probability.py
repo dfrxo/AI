@@ -21,7 +21,6 @@ def update_probability_beep(ship_probability, robot_position, alpha):
         m_probability = ship_probability[coordinates]
         new_probability = (curr_bm_probability * m_probability) / total_beep_probability
         ship_probability[coordinates] = new_probability
-    print("beep" + str(total_beep_probability))
 
     
 def update_probability_no_beep(ship_probability, robot_position, alpha):
@@ -72,3 +71,18 @@ def normalize(ship_probabilties):
    total = sum(ship_probabilties.values())
    for x,y in ship_probabilties.keys():
       ship_probabilties[(x,y)] = ship_probabilties[(x,y)] / total
+
+def normalize_two_mice(ship_probabilities):
+
+    total_1 = 0
+    total_2 = 0
+    temp = ship_probabilities.values()
+    for x, y in temp:
+        total_1+=x
+        total_2+=y
+
+    for x,y in ship_probabilities.keys():
+        temp = ship_probabilities[(x,y)]
+        ship_probabilities[(x,y)] = [temp[0]/total_1, temp[1]/total_2]
+    
+    

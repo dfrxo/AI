@@ -8,7 +8,7 @@ def main():
     bot_id = 1
     d = 41
     mice_type = 2   # 1 for stationary, 2 for stochastic
-    alpha = .04
+    alpha = .17
     
     #rd.seed(8) # Set random seed (same result each run)
     SCREEN_WIDTH = 900
@@ -149,11 +149,12 @@ def main():
             ship_probabilities = stochastic_mouse.stochastic_update_probability_two_mice(ship, ship_probabilities)
 
             
+        update_probability.normalize_two_mice(ship_probabilities)
 
 
         if end:
              pygame.quit()  
-             with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI\datafiles\data.csv', 'a', newline='') as file:
+             with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI\datafiles\data_two_mice.csv', 'a', newline='') as file:
                   writer = csv.writer(file)
                   writer.writerows([[bot_id, mice_type, step_counter, alpha]])
                   print("written")

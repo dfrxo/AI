@@ -7,8 +7,8 @@ def main():
     pygame.init()
     bot_id = 2
     d = 41
-    mice_type = 2   # 1 for stationary, 2 for stochastic
-    alpha = .06
+    mice_type = 1   # 1 for stationary, 2 for stochastic
+    alpha = .10
     #rd.seed() # Set random seed (same result each run)
     SCREEN_WIDTH = 900
     SCREEN_HEIGHT = 900

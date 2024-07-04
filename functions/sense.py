@@ -7,9 +7,8 @@ def sense(robot_position, mouse_positions, alpha):
      manhattan_distance = abs(x-a) + abs(y-b)
 
      result = math.e ** (-alpha * (manhattan_distance-1))  # Find chance of beep
-     print(result)
      if rd.random() < result:          # Roll for beep, return True if we get a beep
-          print("Beep")
+          print("Beep" + str(result))
           return True
      return False             # Return false if no beep
 

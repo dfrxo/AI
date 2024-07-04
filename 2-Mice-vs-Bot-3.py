@@ -1,14 +1,14 @@
 import pygame, random as rd, math, heapq, csv, os
 from collections import defaultdict, OrderedDict
-from functions import create_ship, search_button_increment, sense, update_probability, stochastic_mouse
+from functions import create_ship, search_button_increment, sense, update_probability, stochastic_mouse, bot_3_smart_sense
 
 
 def main(): 
     pygame.init()
-    bot_id = 2
+    bot_id = 3
     d = 41
     mice_type = 2   # 1 for stationary, 2 for stochastic
-    alpha = .04
+    alpha = .05
     
     #rd.seed(8) # Set random seed (same result each run)
     SCREEN_WIDTH = 900
@@ -83,7 +83,8 @@ def main():
         pygame.display.update()
         
         # Increment 
-        if step_counter % 2 == 1:
+        if step_counter%2==1:
+        #if bot_3_smart_sense.bot_3_smart_sense(ship_probabilities, robot_position, alpha,):
             print("Sense")
             if sense.senseTwo(robot_position,mouse_1_position,mouse_2_position,alpha): # Sense. 
                 update_probability.update_probabilities_two_mice(ship_probabilities, robot_position, True, alpha) # Update probabilities given a beep
@@ -91,13 +92,21 @@ def main():
                 update_probability.update_probabilities_two_mice(ship_probabilities, robot_position, False, alpha) 
             step_counter+=1
             continue
-         
-        path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
-                                                                            ship_probabilities, alpha)
+            
+        if len(path)==0:
+            path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, 
+                                                                                ship_probabilities, alpha)
+            path_length = min(len(path), 15)  # 4 sucks, 11 : 296, 6:299, 20 : 290
+            montecarlo_map = bot_3_smart_sense.bot_3_montecarlo_two_mice(ship, ship_probabilities, path_length)
+            path = search_button_increment.search_button_increment(ship, robot_position, mouse_1_position, montecarlo_map, alpha)
+
+
 
         new_robot_position = path[0]
         ship_probabilities[new_robot_position] = [0,0]
         path.pop(0)
+
+        #bot_3_smart_sense.nudge(ship_probabilities, robot_position, new_robot_position)
 
         x,y = robot_position
         ship[x][y] = 'O'
@@ -119,7 +128,6 @@ def main():
         ship[x][y] = 'R'
         test_surface.fill("whitesmoke")
         screen.blit(test_surface,(int(y*SPLIT),int(x*SPLIT)))
-        robot_position = new_robot_position 
 
         if mice_type == 2:
             
@@ -153,10 +161,12 @@ def main():
 
             
 
+        robot_position = new_robot_position 
 
+        update_probability.normalize_two_mice(ship_probabilities)
         if end:
              pygame.quit()  
-             with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI\datafiles\data.csv', 'a', newline='') as file:
+             with open(r'C:\Users\vsh00\OneDrive - Rutgers University\python\AI\datafiles\data3.csv', 'a', newline='') as file:
                   writer = csv.writer(file)
                   writer.writerows([[bot_id, mice_type, step_counter, alpha]])
                   print("written")
